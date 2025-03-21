@@ -1,3 +1,4 @@
+import numpy as np 
 def cross_validation(model, X, y, nFolds):
     """
     Perform cross-validation on a given machine learning model to evaluate its performance.
@@ -40,30 +41,41 @@ def cross_validation(model, X, y, nFolds):
 
     print(f'Mean CV Score: {mean_score}, Std Deviation: {std_score}')
     """
+    n_datos =  X.shape[0]
+    
     if nFolds == -1:
         # Implement Leave One Out CV
         nFolds = X.shape[0]
 
     # TODO: Calculate fold_size based on the number of folds
-    fold_size = None
+    fold_size = n_datos // nFolds
 
     # TODO: Initialize a list to store the accuracy values of the model for each fold
-    accuracy_scores = []
+    accuracy_scores = [] #en esta lista puntauacion de cada fold 
 
-    for i in range(nFolds):
+    for i in range(nFolds): #bucle para iterar sobre los n folds
         # TODO: Generate indices of samples for the validation set for the fold
-        valid_indices = None
+        indice_inicial = i * fold_size
+        indice_final = (i + 1) * fold_size if i < nFolds - 1 else n_datos
+        
+        valid_indices = np.arange(indice_inicial, indice_final)
 
         # TODO: Generate indices of samples for the training set for the fold
-        train_indices = None
+        train_indices = np.concatenate([np.arange(0, indice_inicial), np.arange(indice_final, n_datos)]) #creas indices de conjunot de entrenamiento dejando fuera los de validacion
 
         # TODO: Split the dataset into training and validation
-        X_train, X_valid = None, None
-        y_train, y_valid = None, None
+        X_train, X_valid = X[train_indices], X[valid_indices]
+        y_train, y_valid = y[train_indices], y[valid_indices]
 
         # TODO: Train the model with the training set
-
-        # TODO: Calculate the accuracy of the model with the validation set and store it in accuracy_scores
-
+        model.fit(X_train, y_train) #ahora probamos con el train de esta iteracion
+        
+        # TODO: Calculate
+        # the accuracy of the model with the validation set and store it in accuracy_scores
+        fold_score = model.score(X_valid, y_valid)
+        accuracy_scores.append(fold_score)
+        
     # TODO: Return the mean and standard deviation of the accuracy_scores
-    return None, None
+    mean_score = np.mean(accuracy_scores)
+    std_score = np.std(accuracy_scores)
+    return mean_score, std_score
